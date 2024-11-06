@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confetti Falling</title>
+<link rel="stylesheet" href="styles.css">
+<style type="text/css">
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.confetti-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.confetti {
+    position: absolute;
+    background: #f00; /* Change color as needed */
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: fall 4s linear infinite; /* Adjust animation duration as needed */
+}
+
+@keyframes fall {
+    0% {
+        top: -10px;
+    }
+    100% {
+        top: 100%;
+    }
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="confetti-container"></div>
+
+<script >
+// Function to create confetti element
+function createConfetti() {
+    const confetti = document.createElement("div");
+    confetti.classList.add("confetti");
+    confetti.style.left = Math.random() * window.innerWidth + "px";
+    document.querySelector(".confetti-container").appendChild(confetti);
+
+    // Remove the confetti element after animation ends
+    confetti.addEventListener("animationend", function() {
+        confetti.remove();
+    });
+}
+
+// Function to create multiple confetti
+function createConfettiBlast() {
+    for (let i = 0; i < 50; i++) {
+        createConfetti();
+    }
+}
+
+// Create confetti blast after delay
+setTimeout(createConfettiBlast, 1000);
+
+
+
+</script>
+</body>
+</html>
