@@ -274,7 +274,7 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(gameconfiguration)
             }
-            fetch('http://localhost:5000/startgame/',requestOptions)
+            fetch('/startgame/',requestOptions)
             .then(function(response){
                 console.log(response)
             })
@@ -307,7 +307,7 @@
                 body: JSON.stringify(humanMove)
             }
 
-            fetch('http://localhost:5000/processHumanMove/',requestOptions)
+            fetch('/processHumanMove/',requestOptions)
                 .then(function(response){
                     return response.json() // get the treant tree results 
                 })
@@ -323,7 +323,7 @@
 
         }
         function getBoardStateAndRender(){
-            fetch('http://localhost:5000/getCurrentBoardState/')
+            fetch('/getCurrentBoardState/')
                 .then(function(response){
                     return response.text()
                 })

@@ -12,11 +12,14 @@ package main
 import(
 	"fmt"
 	"net/http"
+	"os"
 )
 
 
 func main() {
 	fmt.Println("!!Welcome to the Triple T Tantilizer!!")
+
+	
 
 	/* this was used to set up the game board for the first time 
  	   and mainly to test the prediction tree 
@@ -75,7 +78,15 @@ func main() {
 	http.Handle("/staticfiles/", http.StripPrefix("/staticfiles/", http.FileServer(http.Dir("staticfiles"))))
 
 	
-	http.ListenAndServe(":5000", nil)
+	// http.ListenAndServe("0.0.0.0:5000", nil)
+	environment := os.Getenv("GO_ENV")
+	// fmt.Println(environment)
+	
+	if (environment == "development") {
+		http.ListenAndServe("localhost:5000", nil)
+	} else {
+		http.ListenAndServe("0.0.0.0:5000", nil)
+	}
 
 
 }
