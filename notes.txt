@@ -1,0 +1,97 @@
+
+TO DO 
+-----------------------------------------------------------------------------------------------
+1 when the game draws, you can't get back to a new game 
+2 there is no way to win right now, so the code that handles winnign doesn't reset the board 
+3 in index.html, lock table table until you get back a session id from server
+4 dial down the difficulty, maybe by adjust the tree size BuildMoveTreeBreadthFirst by capping queue length 
+5 clicking restart creates new game sessions, so you could run out of memory if someone spams restart 
+
+
+
+
+
+
+
+
+
+Helpful notes
+-----------------------------------------------------------------------------------------------
+1. index.html is loaded 
+2. the user is defaulted to being x 
+3. gamePlayFacilitation.startGame creates the BoardInstance and initializes it 
+4. When serving a page using html/template you have to update the path of the .js and style sheets in the html files 
+
+
+
+--- How to update game to support multiple users -- 
+-----------------------------------------------------------------------------------------------
+DONE!!! NOV 2024
+
+1. gamesession - this includes the models needs to start a game, gameboard + prediction tree and a session id
+2. new user starts game, create a new session, store it in a map along with session id
+	- generate session id 
+	- controller will start game and pass a session id to the client to store in local storage / cookie
+3 human moves -> update controller to 
+	- receive a session id
+	- change gamePlayFacilitation struct to have a gamesession struct instead of a single game tree/boardinstance
+	- change controller functions to interact with gamesessions struct of gamePlayFacilitation struct 
+		- find that session in the map 	
+		- make minimax next move computation for the correct tree 
+		- 
+4. Game Won / Lost / Drawn
+	- change controller to work with gamesessions 
+	- reinit the tree and board istance, remove entry (clear memory?)
+
+
+
+-----------------------------------------------------------------------------------------------
+OLD DEV CODE THAT SHOWS HOW TO CREATE THE PREDICTION TREE 
+/*
+	- HOW TO RENDER THE GAME TREE AND RENDER IN BROWSER USING TREANT LIBRARY 
+	- deprecatred function 
+	- it takes a pre-configurd BoardInstance gameboard and loads up the prediciton tree, produces the TreantTree 
+	- and send it to the browser. Deprecated because now the user will start the game
+*/
+/*func (gp *gamePlayFacilitation)computeGameTreeAndReturnInTreantFormatForRenderinginBrowser(writer http.ResponseWriter, request *http.Request){
+
+	fmt.Println("hello")
+
+	gp.predictionTree = NewTree(gp.gameBoard,'x')
+	gp.predictionTree.BuildMoveTreeBreadthFirst(gp.predictionTree.Root)
+	gp.predictionTree.Minimax(gp.predictionTree.Root,true)
+
+	nodeIndex, _ := gp.predictionTree.SearchMiniMaxedTreeForNextComputerMove()
+	fmt.Println("next move should be nodeIndex:", nodeIndex)
+
+	// take the built prediction tree + minimax scores on the nodes, and change into a format the treant libary can render in browser
+	treantTree := gp.predictionTree.CreateTreantJSONTree()
+
+	// send the tree, now in treant format for rendering, back to the browser 
+	writer.Header().Set("Content-Type","application/json")
+	json.NewEncoder(writer).Encode(treantTree)
+}*/
+
+
+// ------------------------------------------------------------------------------------------------------------
+OLD COD THAT SHOWS HOW TO CREATE THE TREANT TREE FOR DEBUGGING, OR AS A FEATURE TO SHOW 
+  <script type="text/javascript">
+/* 
+    - HOW TO RENDER THE GAME TREE AND RENDER IN BROWSER USING TREANT LIBRARY 
+    originally this code loads an instance of the tree onload of the page
+    now deprecated because we'll start with interpreting the user's interaction
+    with the toggles
+
+*/
+// sample treant tree code 
+// new Treant( simple_chart_config ,function(){alert('Tree Loaded')});
+
+// fetch('http://localhost:5000/computeGameTreeAndReturnInTreantFormatForRenderinginBrowser/')
+//     .then(function(response){
+//         return response.json()
+//     })
+//     .then(function (data) {
+//         globalUITree = new Treant(data);
+//         getBoardStateAndRender()   
+//     })
+  </script>

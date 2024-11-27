@@ -19,6 +19,24 @@ type BoardInstance struct {
 	ComputerPlayer 		byte //capture which symbol the computer is, x or o
 }
 
+func NewBoardInstance() *BoardInstance{
+	return &BoardInstance{
+		Board: [3][3]byte {
+			{'-','-','-'},
+			{'-','-','-'},
+			{'-','-','-'},
+		},
+		Html: "",
+		CellCount: 0,
+		Winner: false, 
+		BoardStateScore: 0,
+		MiniMaxScore: 0,
+		CurrentMove: '-', //signifies latest move just happened	
+		HumanPlayer: 'x',
+		ComputerPlayer: 'o',
+	}
+}
+
 func (b *BoardInstance) IsGameFinishedForOpposition(nextMoveOorX byte) bool {
 	var opposition byte
 	if nextMoveOorX == 'x' {

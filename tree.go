@@ -4,12 +4,8 @@ import (
 		"fmt"
 		"math"
 		"strconv"
-		// "encoding/json"
 		"tictactoe/queue"
 		"tictactoe/treantchart"
-		// "io"
-		// "math/rand"
-    	// "time"
 	)
 
 // ---- NODE  DATA STRUCTURE START -----
@@ -38,6 +34,18 @@ func (node *Node) AddChild(pPayLoad BoardInstance) *Node {
 // ---- NODE  DATA STRUCTURE END -----
 
 // ----TREE DATA STRUCTURE START -----
+
+/* 
+
+	-- to use this Tree model, you run the following functions (maybe you should wrap these in the constructor?)
+	gp.predictionTree = NewTree(gp.gameBoard,gp.gameBoard.ComputerPlayer)
+	gp.predictionTree.BuildMoveTreeBreadthFirst(gp.predictionTree.Root)
+	gp.predictionTree.Minimax(gp.predictionTree.Root,true)
+	//with minimax tree + scores created; search top layer of children to find highest score which is the next move
+	nodeIndex, bi := gp.predictionTree.SearchMiniMaxedTreeForNextComputerMove()
+
+*/ 
+
 type Tree struct {
 	Root 				*Node 
 	NodeCount 			int 
@@ -55,7 +63,7 @@ func NewTree(pPayLoad BoardInstance, currentplayerxoro byte) *Tree {
 func (t *Tree) PrintNodesBreadthFirst(/*root *Node*/) {
 	
 	var q = new(queue.Queue)
-	q.Enqueue(/*root*/ t.Root)
+	q.Enqueue(t.Root)
 
 	for q.IsEmpty() == false {
 		traverseNode := q.PeekFront().(*Node)
@@ -85,7 +93,7 @@ func (t *Tree) PrintNodesBreadthFirst(/*root *Node*/) {
 func (t *Tree) BuildMoveTreeBreadthFirst(root *Node) {
 	
 	var nodeCount int = 1 
-	var nextMoveOorX  byte 
+	var nextMoveOorX byte 
 
 	var q = new(queue.Queue)
 	q.Enqueue(root) //add the root node to the queue 
@@ -120,15 +128,12 @@ func (t *Tree) BuildMoveTreeBreadthFirst(root *Node) {
 			
 			childnode.Index = nodeCount
 			nodeCount++
-
 			
 			if isGameFinished == false {
 				q.Enqueue(childnode) 
 			} 			
 		}
-
 		q.Dequeue()
-
 		// use queue length to control the size of the future move tree you build 
 		// if q.Length() > 300 { 
 		// 	break 				
@@ -240,9 +245,6 @@ func Minimizer(node *Node) float64 {
 }
 
 func (t *Tree) SearchMiniMaxedTreeForNextComputerMove() (int, BoardInstance) {
-
-	fmt.Println("looking at root's children for next move")
-
 	var minimaxScoreOfCurrentNode int = -100 
 	var nodeIndexOfNextMove int = 0
 	var boardinstanceOfNextMove BoardInstance  
@@ -258,21 +260,6 @@ func (t *Tree) SearchMiniMaxedTreeForNextComputerMove() (int, BoardInstance) {
 	return nodeIndexOfNextMove, boardinstanceOfNextMove
 
 }
-
-			// minEval := 100.0 
-			// for i:=0;i<len(node.Children);i++ {
-			// 	fmt.Println("   invoking maximizer on  node: ", node.Children[i].Index," ; minEVal currently is:", minEval/*," tempEval: ", tempEval)*/ )
-			// 	tempEval 								:= t.Minimax(node.Children[i],true)
-			// 	fmt.Println(node.Children[i].Index,":",minEval,tempEval)
-			// 	minEval 								= math.Min(minEval,tempEval)
-			// 	fmt.Println("min ouput:",minEval)
-			// 	minimaxOutput 							= minEval
-			// 	node.Children[i].PayLoad.MiniMaxScore 	= int(minimaxOutput)
-				
-			// 	node.Children[i].PayLoad.Html = "<div><b>mmS:"+  strconv.Itoa(node.Children[i].PayLoad.MiniMaxScore) +"</b></div>" + node.Children[i].PayLoad.Html
-			// 	fmt.Println("   post invokation on node: ", node.Children[i].Index," its MMs is: ", node.Children[i].PayLoad.MiniMaxScore," child returned tempEval: ", tempEval)
-
-
 // ---- MINIMAX TREE CONSTRUCTION END -----
 
 

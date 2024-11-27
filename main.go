@@ -1,12 +1,5 @@
 
-/*
-- When serving a page using html/template you have to update the path of the .js and style sheets in the html files 
 
-1. index.html is loaded 
-2. the user is defaulted to being x 
-3. gamePlayFacilitation.startGame creates the BoardInstance and initializes it 
-
-*/
 package main 
 
 import(
@@ -15,53 +8,30 @@ import(
 	"os"
 )
 
-
 func main() {
+
+// -- developpment -- 
+	// tempGS := NewGameSession()
+	// gss := NewGameSessions()
+	// gss.CreateNewSession()
+	// gss.CreateNewSession()
+	// gss.CreateNewSession()
+	// fmt.Println("hello", gss)
+
+	// gpf := NewGamePlayFacilitation()
+
+
+	// gamePlayFacilitator2 :=  NewGamePlayFacilitation()
+	// http.HandleFunc("/startgame2/",gamePlayFacilitator2.startgame2)
+	// http.HandleFunc("/processHumanMove2/",gamePlayFacilitator2.processHumanMove2)
+// -- developpment -- 
+
+// ----------------------------------
+
+
 	fmt.Println("!!Welcome to the Triple T Tantilizer!!")
 
-	
-
-	/* this was used to set up the game board for the first time 
- 	   and mainly to test the prediction tree 
-
-	*/
-	// var theMainGameBoard BoardInstance = BoardInstance  {
-	// 	Board: [3][3]byte {
-	// 		{'-','-','-'},
-	// 		{'-','x','-'},
-	// 		{'o','-','-'},
-	// 	},
-	// 	Html: "",
-	// 	CellCount: 0,
-	// 	Winner: false, 
-	// 	BoardStateScore: 0,
-	// 	MiniMaxScore: 0,
-	// 	CurrentMove: 'o', //signifies latest move just happened
-	// }
-
-	// theMainGameBoard.CreateHTMLforTableToFindNextMove(0,0,false,false,0)
-	
-
-	var gamePlayFacilitator gamePlayFacilitation 
-
-	// var nextMoveSymbol byte 
-	// if gameBoard.CurrentMove == 'x' {
-	// 	nextMoveSymbol = 'o'
-	// } else {
-	// 	nextMoveSymbol = 'x'
-	// }
-
-	// -- Tutorial on how to create a tree and render it using the Treant library
-	//steps to set up tree, compute minimax and from that find next move amongst the root's children 
-	// var moveTree *Tree = NewTree(gameBoard,nextMoveSymbol)
-	// moveTree.BuildMoveTreeBreadthFirst(moveTree.Root)
-	// moveTree.Minimax(moveTree.Root,true)
-	// fmt.Println(moveTree.SearchMiniMaxedTreeForNextComputerMove())
-
-	// -- UI Code 
-	// treantTree := moveTree.CreateTreantJSONTree()
-	// fmt.Println("Tree size:", moveTree.NodeCount)
-	
+	gamePlayFacilitator := NewGamePlayFacilitation()
 
 // -- web server stuff START -- 
 	fmt.Println("Starting Server")
@@ -69,19 +39,14 @@ func main() {
 	http.HandleFunc("/",index)
 	// http.HandleFunc("/computeGameTreeAndReturnInTreantFormatForRenderinginBrowser/",gamePlayFacilitator.computeGameTreeAndReturnInTreantFormatForRenderinginBrowser)
 	http.HandleFunc("/startgame/",gamePlayFacilitator.startGame)
+	http.HandleFunc("/restartGame/",gamePlayFacilitator.restartGame)
 	http.HandleFunc("/processHumanMove/",gamePlayFacilitator.processHumanMove)
 	// http.HandleFunc("/executeComputerMove/",gamePlayFacilitator.executeComputerMove)
 	http.HandleFunc("/getCurrentBoardState/",gamePlayFacilitator.getCurrentBoardState)
 
-	
-
 	http.Handle("/staticfiles/", http.StripPrefix("/staticfiles/", http.FileServer(http.Dir("staticfiles"))))
 
-	
-	// http.ListenAndServe("0.0.0.0:5000", nil)
-	environment := os.Getenv("GO_ENV")
-	// fmt.Println(environment)
-	
+	environment := os.Getenv("GO_ENV")	
 	if (environment == "development") {
 		http.ListenAndServe("localhost:5000", nil)
 	} else {
@@ -92,6 +57,16 @@ func main() {
 }
 
 
+// -- Tutorial on how to create a tree and render it using the Treant library --
+//steps to set up tree, compute minimax and from that find next move amongst the root's children 
+// var moveTree *Tree = NewTree(gameBoard,nextMoveSymbol)
+// moveTree.BuildMoveTreeBreadthFirst(moveTree.Root)
+// moveTree.Minimax(moveTree.Root,true)
+// fmt.Println(moveTree.SearchMiniMaxedTreeForNextComputerMove())
+
+// -- UI Code 
+// treantTree := moveTree.CreateTreantJSONTree()
+// fmt.Println("Tree size:", moveTree.NodeCount)
 
 
 
