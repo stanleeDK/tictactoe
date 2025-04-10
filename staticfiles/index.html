@@ -9,7 +9,7 @@
         .winner {background-color: green }
         .oppositionwon {background-color: red}
         #gamestatuswhenover {height: 30px}
-        #newgame{height: 30px;display: none; margin-top: 100px    }
+        #newgame{height: 30px;visibility: hidden; margin-top: 100px    }
         img {
           max-width: 60px; /* Set the desired maximum width */
           height: auto; /* Maintain aspect ratio */
@@ -251,7 +251,7 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(humanMove)
             }
-            document.getElementById('newgame').style.display = 'none'
+            document.getElementById('newgame').style.visibility = 'hidden'
 
             fetch('/processHumanMove/',requestOptions)
                 .then(function(response){
@@ -259,16 +259,13 @@
                 })
                 .then(function (data) {
                     // globalUITree.tree.reset(simple_chart_config,0) //not sure what this is for
-
                     //-- enable this to show the tree, otherwise comment out for peformance --
                     // globalUITree = new Treant(data);
-
                     getBoardStateAndRender()  
                 })
         }
 
         function getBoardStateAndRender(){
-
             const params = new URLSearchParams({sessionid:sessionidg})
             const url    = `/getCurrentBoardState?${params.toString()}`
 
@@ -296,7 +293,7 @@
                     var tablediv = document.querySelectorAll('.oppositionwon')
                     if (tablediv.length > 0) {
                         document.getElementById('gamestatuswhenover').innerText = "YOU LOST!!!"
-                        document.getElementById('newgame').style.display = 'block'
+                        document.getElementById('newgame').style.visibility = 'visible'
                         document.querySelector('.board').classList.add('noniteractive')
                     }
                     var tablediv2 = document.querySelectorAll('.winner')

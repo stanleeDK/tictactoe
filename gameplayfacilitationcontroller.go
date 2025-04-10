@@ -59,7 +59,9 @@ func (gp *gamePlayFacilitation)newGame() string {
 
 func (gp *gamePlayFacilitation)processHumanMove(writer http.ResponseWriter, request *http.Request){
 
-	gp.printAllGames()
+	gp.printAllGames() // debug statement to show all concurrent players' games to terminal 
+
+
 /* use requestData as a map to extract the below 
             var humanMove = {
                 cellIndex: cellIndex,
@@ -67,7 +69,6 @@ func (gp *gamePlayFacilitation)processHumanMove(writer http.ResponseWriter, requ
                 sessionid: sessionStorage.getItem('sessionid') 
             }
 */
-
 	var requestData map[string]interface{} 
 	json.NewDecoder(request.Body).Decode(&requestData) // get the cellIndex and the value within that cell 
 

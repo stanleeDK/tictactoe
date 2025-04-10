@@ -1,7 +1,21 @@
 
+
+
+
+-----------------------------------------------------------------------------------------------
+April 2025 
+notes on running this on aws 
+1. EC2 setup 
+2. If you log on and go to http://54.193.150.151:5000 (the ip address is the public ipv4 found on the N.California instance) and you hard coded the :5000 port 
+3. You do need to launch the console or ssh to the box and go run . to get the app to run 
+4. then you can access using the url above. 
+5. playing one game did crazsh it 
+
+
 TO DO 
 -----------------------------------------------------------------------------------------------
 1 when the game draws, you can't get back to a new game 
+	- finish the drawn game evaluation in boardinstance.go on line 64
 2 there is no way to win right now, so the code that handles winnign doesn't reset the board 
 3 in index.html, lock table table until you get back a session id from server
 4 dial down the difficulty, maybe by adjust the tree size BuildMoveTreeBreadthFirst by capping queue length 

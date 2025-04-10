@@ -61,6 +61,15 @@ func (b *BoardInstance) IsGameFinished(nextMoveOorX byte) bool {
 
 	return false //no winner yet 
 }
+//finish draw function
+// func (b *BoardInstance) DrawMatchEvaluation(nextMoveOorX byte) bool {
+// 	for i:=0;i<3;i++ {
+// 		for j:=1;j<3;j++ {
+
+// 		}
+// 	}
+
+// }
 
 func (b *BoardInstance) HorizontalMatchEvaluation(nextMoveOorX byte) bool {
 	var horizontalwin int = 0

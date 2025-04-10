@@ -47,8 +47,9 @@ func main() {
 	http.Handle("/staticfiles/", http.StripPrefix("/staticfiles/", http.FileServer(http.Dir("staticfiles"))))
 
 	environment := os.Getenv("GO_ENV")	
+	fmt.Println (environment)
 	if (environment == "development") {
-		http.ListenAndServe("localhost:5000", nil)
+		http.ListenAndServe("localhost:8888", nil)
 	} else {
 		http.ListenAndServe("0.0.0.0:5000", nil)
 	}
