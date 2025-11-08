@@ -3,20 +3,30 @@ package main
 import (
 	"strings"
 	"strconv"
-	// "fmt"
+	"fmt"
+)
+
+type GameState int 
+
+const (
+	Draw 				GameState = 0
+	ComputerIsOAndWon 	GameState = 1 
+	HumanisXandWon 		GameState = 2
+	GameNotFinished 	GameState = 3 
 )
 
 type BoardInstance struct {
 	Board [3][3] 		byte  
 	Html 				string 
 	CellCount 			int 
-	CurrentMove 		byte //signifies latest move just happened; so if x then the latest move was x and the next move is o's move
+	MostRecentPlayer 	byte //signifies latest move just happened; so if player played most recently then this is x and the next move is o's move
 	CurrentTreeDepth 	int 
 	Winner 				bool 
-	BoardStateScore		float64 
+	BoardStateScore		int 
 	MiniMaxScore 	 	int 
 	HumanPlayer			byte //capture which symbol the human is, x or o
 	ComputerPlayer 		byte //capture which symbol the computer is, x or o
+	CurrentGameState 	GameState
 }
 
 func NewBoardInstance() *BoardInstance{
@@ -31,45 +41,50 @@ func NewBoardInstance() *BoardInstance{
 		Winner: false, 
 		BoardStateScore: 0,
 		MiniMaxScore: 0,
-		CurrentMove: '-', //signifies latest move just happened	
+		MostRecentPlayer: '-', //signifies latest move just happened	
 		HumanPlayer: 'x',
 		ComputerPlayer: 'o',
+		CurrentGameState: GameNotFinished,
 	}
 }
 
-func (b *BoardInstance) IsGameFinishedForOpposition(nextMoveOorX byte) bool {
-	var opposition byte
-	if nextMoveOorX == 'x' {
-		opposition = 'o'
-	} else {
-		opposition = 'x'
+func (b *BoardInstance) ReturnEvaluationOfGameBoard () {
+
+	if b.HorizontalMatchEvaluation('o') == true || b.VerticallMatchEvaluation('o') == true || b.DiagonalMatchEvaluation('o') == true { 
+		b.CurrentGameState = ComputerIsOAndWon
+		return
 	}
-	return b.IsGameFinished(opposition)
+	if b.HorizontalMatchEvaluation('x') == true || b.VerticallMatchEvaluation('x') == true || b.DiagonalMatchEvaluation('x') == true { 
+		b.CurrentGameState = HumanisXandWon
+		return
+	}
+	if b.IsMatchADraw() == true {
+		b.CurrentGameState = Draw
+		return
+	}
+
+	b.CurrentGameState = GameNotFinished
 }
 
-func (b *BoardInstance) IsGameFinished(nextMoveOorX byte) bool {
 
-	if b.DiagonalMatchEvaluation(nextMoveOorX) {
-		return true 
-	}
-	if b.HorizontalMatchEvaluation(nextMoveOorX) {
-		return true 
-	}
-	if b.VerticallMatchEvaluation(nextMoveOorX) {
-		return true 
-	}
 
-	return false //no winner yet 
-}
 //finish draw function
-// func (b *BoardInstance) DrawMatchEvaluation(nextMoveOorX byte) bool {
-// 	for i:=0;i<3;i++ {
-// 		for j:=1;j<3;j++ {
+func (b *BoardInstance) IsMatchADraw() bool {
 
-// 		}
-// 	}
+	if b.HorizontalMatchEvaluation('o') == false || b.VerticallMatchEvaluation('o') == false || b.DiagonalMatchEvaluation('o') == false {
+		// fmt.Println("o didn;t win")
+		if b.HorizontalMatchEvaluation('x') == false || b.VerticallMatchEvaluation('x') == false || b.DiagonalMatchEvaluation('x') == false {
+			// fmt.Println("x didn;t win")
+			if b.IsBoardFull() == true {
+				// fmt.Println("board is full")
+				return true 
+			}
+		}
+	}
 
-// }
+	return false 
+
+}
 
 func (b *BoardInstance) HorizontalMatchEvaluation(nextMoveOorX byte) bool {
 	var horizontalwin int = 0
@@ -158,24 +173,66 @@ func (b *BoardInstance) DiagonalMatchEvaluation(nextMoveOorX byte) bool {
 	return false 
 }
 
-// func (b *BoardInstance) IsBoardFull () bool {
-// 	// var count int = 1 
-// 	for i:=0;i<3;i++ {
-// 		for j:=1;j<3;j++ {
-// 			if b.Board[i][j] == '-' {
-// 				return false 
-// 			}
-// 		}
-// 	}
-// 	return true 	
-// }
+func (b *BoardInstance) IsBoardFull () bool {
+	// var count int = 1 
+	for i:=0;i<3;i++ {
+		for j:=0;j<3;j++ {
+			// fmt.Println(string(b.Board[i][j]))
+			if b.Board[i][j] == '-' {
+				return false 
+			}
+		}
+	}
+	return true 	
+}
+func (b *BoardInstance) CreateHTMLforTableToRenderUserFacingBoardState(){
+	var writer strings.Builder 
+	// fmt.Println("game state", b.CurrentGameState)
+	
+	switch b.CurrentGameState {
+	case Draw: 
+		writer.WriteString("<table class=\"draw\">")
+	case ComputerIsOAndWon:
+		writer.WriteString("<table class=\"computerisIandWon\">")
+	case HumanisXandWon:
+		writer.WriteString("<table class=\"humanisXandWon\">")	
+	case GameNotFinished:
+		writer.WriteString("<table>")
 
-func (b *BoardInstance) CreateHTMLforTableToFindNextMove(nodeIndex int, treeLevel int, isGameFinished bool,oppositionWon bool, boardstatescore int) {
+	}
+
+	for i:=0;i<3;i++ {
+		writer.WriteString("<tr>")		
+		for j:=0;j<3;j++ {
+			writer.WriteString("<td id=minimaxboard")
+			writer.WriteString(strconv.Itoa(i))
+			writer.WriteString(strconv.Itoa(j))
+			writer.WriteString(">")
+			switch b.Board[i][j] {
+			case 'o':
+				writer.WriteString("o")
+			case 'x':
+				writer.WriteString("x")
+			case '-':
+				writer.WriteString("-")
+		}
+		writer.WriteString("</td>")
+	}
+	writer.WriteString("</tr>")
+}
+
+	writer.WriteString("</table>")
+	//fmt.Println(writer.String())
+	b.Html = ""
+	b.Html = writer.String()
+
+}
+func (b *BoardInstance) CreateHTMLforTableToFindNextMove(nodeIndex int, treeLevel int) {
 	var writer strings.Builder 
 
 	var nextMove string 
 
-	if b.CurrentMove == 'x' {
+	if b.MostRecentPlayer == 'x' {
 		nextMove = "o"
 	} else {
 		nextMove = "x"
@@ -206,16 +263,19 @@ func (b *BoardInstance) CreateHTMLforTableToFindNextMove(nodeIndex int, treeLeve
 	writer.WriteString("</b></span>")
 
 	writer.WriteString("</br><span><b>sc:")
-	writer.WriteString(strconv.Itoa(boardstatescore))
+	writer.WriteString(strconv.Itoa(b.BoardStateScore))
 	writer.WriteString("</b></span>")
 
-
-	if isGameFinished == true && oppositionWon == false {
-		writer.WriteString("<table class=\"winner\">")
-	} else if oppositionWon == true {
-		writer.WriteString("<table class=\"oppositionwon\">")	
-	} else {
+	switch b.CurrentGameState {
+	case Draw: 
+		writer.WriteString("<table class=\"draw\">")
+	case ComputerIsOAndWon:
+		writer.WriteString("<table class=\"computerisIandWon\">")
+	case HumanisXandWon:
+		writer.WriteString("<table class=\"humanisXandWon\">")	
+	case GameNotFinished:
 		writer.WriteString("<table>")
+
 	}
 
 	for i:=0;i<3;i++ {
@@ -242,26 +302,31 @@ func (b *BoardInstance) CreateHTMLforTableToFindNextMove(nodeIndex int, treeLeve
 	b.Html = writer.String()
 }
 
-// func (b *BoardInstance) CreateGameBoardHtmlForActualGame () {
-// 	var writer strings.Builder 
+func (b *BoardInstance) PrintBoardtoConsoleForDebugging() {
 
-// 	for i:=0;i<3;i++ {
-// 	writer.WriteString("<tr>")		
-// 	for j:=0;j<3;j++ {
-// 		writer.WriteString("<td>")
-// 		switch b.Board[i][j] {
-// 		case 'o':
-// 			writer.WriteString("o")
-// 		case 'x':
-// 			writer.WriteString("x")
-// 		case '-':
-// 			writer.WriteString("-")
-// 		}
-// 		writer.WriteString("</td>")
-// 	}
-// 	writer.WriteString("</tr>")
-// }
-
-// 	writer.WriteString("</table>")
-// 	b.Html = writer.String()
-// }
+    for i := 0; i < 3; i++ {
+        for j := 0; j < 3; j++ {
+            // Convert byte to string, using a dash if the byte is 0
+            cell := "-"
+            if b.Board[i][j] != 0 {
+                cell = string(b.Board[i][j])
+            }
+            
+            // Print the cell with vertical separators
+            fmt.Printf(" %s ", cell)
+            
+            // Add vertical line between columns, except after the last column
+            if j < 2 {
+                fmt.Print("|")
+            }
+        }
+        
+        // Print a new line after each row
+        fmt.Println()
+        
+        // Print horizontal separators between rows, except after the last row
+        if i < 2 {
+            fmt.Println("-----------")
+        }
+    }
+}

@@ -1,6 +1,39 @@
+scp ttt root@137.184.0.211:/root/ttt
+
+scp index.html root@137.184.0.211:/root/ttt/staticfiles
+GOOS=linux GOARCH=amd64 go build -o ttt
+
+ssh root@137.184.0.211
+
+ tail -n 100 nohup.out | less
+
+ nohup ./ttt &
 
 
+-----------------------------------------------------------------------------------------------
+Oct 2025 
 
+BUGS! 
+1. do you need to have a delete session so the session map doesn't forever increase? in the gamesession.go file
+[done] 2. Tree.CurrentPlayerXorO - remove all instances and go fully into assuming human is always player 'x'
+2. Remove HumanPlayer	 and ComputerPlayer from BoardInstance - computer always o
+3. these combos, with the last move being x, paints a green results (final win?) why? because x didn't win...  
+		o	x	o
+		o	x	x
+		x	o	-
+
+		x	o	x
+		o	o	x
+		x	x	o
+4. another situation where computer loses... 
+		x	o	o
+		o	o	x
+		x	x	x
+5. When you request a tree and the board is blank the app crashes 
+
+
+6. Replace BoardInstance.IsGameFinished with ReturnEvaluationOfGameBoard()
+7. get rid of 		HumanPlayer: 'x', ComputerPlayer: 'o', from board instance
 
 -----------------------------------------------------------------------------------------------
 April 2025 
@@ -14,13 +47,13 @@ notes on running this on aws
 
 TO DO 
 -----------------------------------------------------------------------------------------------
-1 when the game draws, you can't get back to a new game 
+1 when the game draws, you can't get back to a new game [DONE]
 	- finish the drawn game evaluation in boardinstance.go on line 64
-2 there is no way to win right now, so the code that handles winnign doesn't reset the board 
-3 in index.html, lock table table until you get back a session id from server
+2 there is no way to win right now, so the code that handles winnign doesn't reset the board [NOT TRUE]
+3 in index.html, lock table table until you get back a session id from server [CAN;T BE DONE]
 4 dial down the difficulty, maybe by adjust the tree size BuildMoveTreeBreadthFirst by capping queue length 
 5 clicking restart creates new game sessions, so you could run out of memory if someone spams restart 
-
+ 
 
 
 

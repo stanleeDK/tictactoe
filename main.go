@@ -6,71 +6,91 @@ import(
 	"fmt"
 	"net/http"
 	"os"
+	"time"
+	// "encoding/json"
 )
 
 func main() {
 
-// -- developpment -- 
-	// tempGS := NewGameSession()
-	// gss := NewGameSessions()
-	// gss.CreateNewSession()
-	// gss.CreateNewSession()
-	// gss.CreateNewSession()
-	// fmt.Println("hello", gss)
-
-	// gpf := NewGamePlayFacilitation()
 
 
-	// gamePlayFacilitator2 :=  NewGamePlayFacilitation()
-	// http.HandleFunc("/startgame2/",gamePlayFacilitator2.startgame2)
-	// http.HandleFunc("/processHumanMove2/",gamePlayFacilitator2.processHumanMove2)
+	// board := NewBoardInstance() 
+	// board.Board[0][0] = 'x'
+	// board.Board[0][1] = 'o'
+	// board.Board[0][2] = 'o'
+
+	// board.Board[1][0] = '-'
+	// board.Board[1][1] = 'o'
+	// board.Board[1][2] = 'x'
+	
+	// board.Board[2][0] = '-'
+	// board.Board[2][1] = 'x'
+	// board.Board[2][2] = 'x'
+	// tree := NewTree(*board)
+	// fmt.Println(board.Board)
+
+	// tree.BuildMoveTreeBreadthFirst(/*tree.Root*/)
+	// tree.Minimax(tree.Root, true)
+	// // board.PrintBoardtoConsoleForDebugging()
+	// board.ReturnEvaluationOfGameBoard()
+	// fmt.Println(board.CurrentGameState)
+
+	// // http.HandleFunc("/",index)
+	// http.HandleFunc("/showdebuggametree", func(writer http.ResponseWriter, request *http.Request) {
+	// 	fmt.Println("hello")
+	// 	treantTree := tree.CreateTreantJSONTree()
+	// 	writer.Header().Set("Content-Type","application/json")
+	// 	json.NewEncoder(writer).Encode(treantTree)
+	// })
+
+
+
 // -- developpment -- 
 
 // ----------------------------------
 
 
 	fmt.Println("!!Welcome to the Triple T Tantilizer!!")
+	fmt.Println("Starting Server")
 
 	gamePlayFacilitator := NewGamePlayFacilitation()
 
 // -- web server stuff START -- 
-	fmt.Println("Starting Server")
-
 	http.HandleFunc("/",index)
-	// http.HandleFunc("/computeGameTreeAndReturnInTreantFormatForRenderinginBrowser/",gamePlayFacilitator.computeGameTreeAndReturnInTreantFormatForRenderinginBrowser)
 	http.HandleFunc("/startgame/",gamePlayFacilitator.startGame)
 	http.HandleFunc("/restartGame/",gamePlayFacilitator.restartGame)
 	http.HandleFunc("/processHumanMove/",gamePlayFacilitator.processHumanMove)
-	// http.HandleFunc("/executeComputerMove/",gamePlayFacilitator.executeComputerMove)
 	http.HandleFunc("/getCurrentBoardState/",gamePlayFacilitator.getCurrentBoardState)
-
+	http.HandleFunc("/showgametree/", gamePlayFacilitator.showGameTree)
+	http.HandleFunc("/getprogress/", gamePlayFacilitator.getMoveTreeBuildingProgress)
 	http.Handle("/staticfiles/", http.StripPrefix("/staticfiles/", http.FileServer(http.Dir("staticfiles"))))
+	
+
 
 	environment := os.Getenv("GO_ENV")	
 	fmt.Println (environment)
 	if (environment == "development") {
 		http.ListenAndServe("localhost:8888", nil)
 	} else {
-		http.ListenAndServe("0.0.0.0:5000", nil)
+		// err := http.ListenAndServe("0.0.0.0:80", nil)
+
+		srv := &http.Server{
+		    Addr:              "0.0.0.0:80",
+		    Handler:           nil,  // nil = use http.DefaultServeMux (your existing handlers)
+		    // ReadTimeout:       5 * time.Minute,  // For large uploads
+		    WriteTimeout:      30 * time.Second,
+		    // ReadHeaderTimeout: 10 * time.Second,
+		    IdleTimeout:       120 * time.Second,
+		}
+		err := srv.ListenAndServe()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 
+
 }
-
-
-// -- Tutorial on how to create a tree and render it using the Treant library --
-//steps to set up tree, compute minimax and from that find next move amongst the root's children 
-// var moveTree *Tree = NewTree(gameBoard,nextMoveSymbol)
-// moveTree.BuildMoveTreeBreadthFirst(moveTree.Root)
-// moveTree.Minimax(moveTree.Root,true)
-// fmt.Println(moveTree.SearchMiniMaxedTreeForNextComputerMove())
-
-// -- UI Code 
-// treantTree := moveTree.CreateTreantJSONTree()
-// fmt.Println("Tree size:", moveTree.NodeCount)
-
-
-
 
 
 

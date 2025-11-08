@@ -40,6 +40,7 @@ package treantchart
 type TreantChart struct {
 	Chart TreantChartContainer `json:"chart"`
 	NodeStructure TreantNodeStructure `json:"nodeStructure,omitempty"`
+    PayLoadType string `json:"payloadtype"`
 }
 type TreantChartContainer struct {
 	Container string `json:"container"`

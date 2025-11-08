@@ -15,7 +15,7 @@ type GameSession struct {
 func newGameSession() *GameSession {
 
 	gb   := NewBoardInstance()
-	tree := NewTree(*gb,'x')
+	tree := NewTree(*gb)
 	sID := generateSessionID()
 
 	return &GameSession{
@@ -61,3 +61,15 @@ func (gs *GameSessions) CreateNewSession() string {
 	return gamesesh.SessionID
 }
 
+// returns a session pointer to the desired session. It's used to support the end point 
+// which returns the progress /staut of the move tree building function that each game session has 
+func (gs *GameSessions) GetSession(seshId string) (*GameSession, bool) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	sesh, exists := gs.GameSessionsRunning[seshId]
+	if !exists {
+		return nil, false
+	}
+	return sesh, true
+
+}
