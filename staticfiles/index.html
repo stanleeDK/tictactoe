@@ -72,14 +72,13 @@
         }
         #movetreebuildprogress{
             display: inline;
-            color: #0066cc;              /* Link blue color */
-            text-decoration: underline;   /* Underline text */
+            /*color: #0066cc;              /* Link blue color */*/
+            /*text-decoration: underline;   /* Underline text */*/
             cursor: pointer;              /* Hand cursor on hover */
-            /*display: inline-block;        /* Makes it fit content width */*/
         }
         #movetreebuildprogress:hover {
             color: #0052a3;
-            display: inline;
+            /*display: inline;*/
         }
 
         @media (max-width: 480px) {
@@ -132,7 +131,6 @@
 <body>
     <div id="loader">
         <div class="spinner"></div>
-
     </div>
     <div id='gamecontainer'>
         <!-- <img src="/staticfiles/panda.jpg"> -->
@@ -304,9 +302,13 @@
             const url    = `/showgametree?${params.toString()}`
             fetch(url)
                 .then(function(response){
+                    const sizeInBytes = response.headers.get('Content-Length')
+                    // console.log(`Response size: ${sizeInBytes} bytes`);
+
                     return response.json() // get the treant tree results 
                 })
                 .then(function (data) {
+
                     buildTreantTreeinDOM(data)
                 })
         })
