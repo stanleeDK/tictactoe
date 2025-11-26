@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMNT Pizza Slicer</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #2c3e50;
+            font-family: 'Irish Grover', cursive;
+            padding: 10px;
+        }
+
+        #game-container {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+            max-height: 100vh;
+        }
+
+        #game-container canvas {
+            display: block;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        class PizzaSlicerGame extends Phaser.Scene {
+            constructor() {
+                super({ key: 'PizzaSlicerGame' });
+                this.score = 0;
+                this.timeRemaining = 10000; // 10 seconds in milliseconds
+                this.gameStarted = false;
+                this.gameOver = false;
+                this.sliceMarks = [];
+            }
+
+            preload() {
+                // Load katana image for cursor and slash animation
+                this.load.image('katana', './katana.png');
+            }
+
+            create() {
+                const { width, height } = this.cameras.main;
+
+                // Remove all existing input listeners to ensure clean state
+                this.input.removeAllListeners();
+
+                // Create chopping board background with wood grain effect
+                const board = this.add.rectangle(width / 2, height / 2, 450, 450, 0x8B4513);
+                board.setStrokeStyle(6, 0x654321);
+
+                // Add wood grain lines
+                const woodGrain = this.add.graphics();
+                woodGrain.lineStyle(2, 0x654321, 0.3);
+                for (let i = 0; i < 8; i++) {
+                    const y = height / 2 - 200 + i * 50;
+                    woodGrain.lineBetween(width / 2 - 225, y, width / 2 + 225, y + Phaser.Math.Between(-5, 5));
+                }
+
+                // Create pizza base (dough/crust)
+                const pizzaRadius = 160;
+                const centerX = width / 2;
+                const centerY = height / 2;
+
+                // Crust (outer ring) - tan/beige color
+                this.crust = this.add.circle(centerX, centerY, pizzaRadius, 0xE8C07D);
+                this.crust.setStrokeStyle(5, 0xC9A961);
+
+                // Add crust bubbles/texture
+                const crustBubbles = [
+                    { angle: 0, dist: 145 }, { angle: 45, dist: 148 },
+                    { angle: 90, dist: 147 }, { angle: 135, dist: 146 },
+                    { angle: 180, dist: 149 }, { angle: 225, dist: 145 },
+                    { angle: 270, dist: 148 }, { angle: 315, dist: 147 }
+                ];
+
+                crustBubbles.forEach(bubble => {
+                    const rad = Phaser.Math.DegToRad(bubble.angle);
+                    const x = centerX + Math.cos(rad) * bubble.dist;
+                    const y = centerY + Math.sin(rad) * bubble.dist;
+                    this.add.circle(x, y, Phaser.Math.Between(8, 12), 0xD4A960, 0.6);
+                });
+
+                // Cheese layer (slightly smaller than crust)
+                this.cheese = this.add.circle(centerX, centerY, 135, 0xFFD700);
+
+                // Add cheese texture with lighter spots
+                for (let i = 0; i < 25; i++) {
+                    const angle = Phaser.Math.Between(0, 360);
+                    const distance = Phaser.Math.Between(20, 120);
+                    const rad = Phaser.Math.DegToRad(angle);
+                    const x = centerX + Math.cos(rad) * distance;
+                    const y = centerY + Math.sin(rad) * distance;
+                    this.add.circle(x, y, Phaser.Math.Between(5, 10), 0xFFE44D, 0.4);
+                }
+
+                // Tomato sauce spots (showing through cheese)
+                for (let i = 0; i < 15; i++) {
+                    const angle = Phaser.Math.Between(0, 360);
+                    const distance = Phaser.Math.Between(30, 110);
+                    const rad = Phaser.Math.DegToRad(angle);
+                    const x = centerX + Math.cos(rad) * distance;
+                    const y = centerY + Math.sin(rad) * distance;
+                    this.add.circle(x, y, Phaser.Math.Between(3, 7), 0xFF6347, 0.3);
+                }
+
+                // Add pepperoni slices with more detail - spread evenly
+                const pepperoniPositions = [
+                    { x: 0, y: -90 },      // top
+                    { x: 80, y: -50 },     // top right
+                    { x: 95, y: 20 },      // right
+                    { x: 70, y: 75 },      // bottom right
+                    { x: 0, y: 100 },      // bottom
+                    { x: -70, y: 75 },     // bottom left
+                    { x: -95, y: 20 },     // left
+                    { x: -80, y: -50 },    // top left
+                    { x: -40, y: -20 },    // inner left
+                    { x: 40, y: -20 },     // inner right
+                    { x: -35, y: 35 },     // inner bottom left
+                    { x: 35, y: 35 }       // inner bottom right
+                ];
+
+                pepperoniPositions.forEach(pos => {
+                    const pepX = centerX + pos.x;
+                    const pepY = centerY + pos.y;
+
+                    // Main pepperoni
+                    this.add.circle(pepX, pepY, 18, 0xCC0000);
+                    // Darker edge
+                    this.add.circle(pepX, pepY, 18, 0x8B0000, 0.3).setStrokeStyle(1, 0x8B0000);
+                    // Grease/shine spots
+                    this.add.circle(pepX - 3, pepY - 3, 3, 0xFF6B6B, 0.5);
+                    this.add.circle(pepX + 4, pepY + 2, 2, 0xFF6B6B, 0.5);
+                });
+
+                // Add mushroom slices - spread evenly
+                const mushroomPositions = [
+                    { x: -70, y: -35 },    // top left
+                    { x: 60, y: -45 },     // top right
+                    { x: -80, y: 50 },     // bottom left
+                    { x: 75, y: 55 },      // bottom right
+                    { x: -15, y: -55 },    // upper center left
+                    { x: 25, y: 60 },      // lower center right
+                    { x: 0, y: 15 }        // center
+                ];
+
+                mushroomPositions.forEach(pos => {
+                    const mushX = centerX + pos.x;
+                    const mushY = centerY + pos.y;
+
+                    // Mushroom cap
+                    const mushroom = this.add.ellipse(mushX, mushY, 20, 15, 0xE8D4B8);
+                    mushroom.setStrokeStyle(1, 0xC9B99A);
+                    // Mushroom gills
+                    this.add.ellipse(mushX, mushY, 12, 9, 0xD4C4A8, 0.6);
+                });
+
+                // Add green bell pepper strips - spread evenly
+                const pepperGraphics = this.add.graphics();
+                pepperGraphics.fillStyle(0x228B22, 1);
+                const pepperStrips = [
+                    { x: -65, y: -60, w: 25, h: 8 },   // top left
+                    { x: 45, y: -70, w: 28, h: 7 },    // top right
+                    { x: -85, y: -10, w: 22, h: 8 },   // left
+                    { x: 80, y: 0, w: 24, h: 7 },      // right
+                    { x: -50, y: 65, w: 26, h: 8 },    // bottom left
+                    { x: 40, y: 80, w: 23, h: 7 },     // bottom right
+                    { x: -20, y: -25, w: 20, h: 6 },   // upper center
+                    { x: 15, y: 25, w: 22, h: 7 }      // lower center
+                ];
+
+                pepperStrips.forEach(strip => {
+                    pepperGraphics.fillRoundedRect(
+                        centerX + strip.x,
+                        centerY + strip.y,
+                        strip.w,
+                        strip.h,
+                        3
+                    );
+                });
+
+                // Store pizza reference for hit detection
+                this.pizza = this.crust;
+
+                // Create graphics object for slice marks
+                this.sliceGraphics = this.add.graphics();
+
+                // Score text (top left)
+                this.scoreText = this.add.text(20, 20, 'Slices: 0', {
+                    fontSize: '32px',
+                    fontFamily: 'Irish Grover',
+                    color: '#ffffff',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 4
+                });
+
+                // Timer text (top right)
+                this.timerText = this.add.text(width - 20, 20, '10.00s', {
+                    fontSize: '32px',
+                    fontFamily: 'Irish Grover',
+                    color: '#ffffff',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 4
+                });
+                this.timerText.setOrigin(1, 0);
+
+                // Start message
+                this.startText = this.add.text(width / 2, height - 50, 'Click to Start!', {
+                    fontSize: '36px',
+                    fontFamily: 'Irish Grover',
+                    color: '#ffff00',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 5
+                });
+                this.startText.setOrigin(0.5);
+
+                // Hide default cursor and create custom katana cursor
+                this.input.setDefaultCursor('none');
+
+                // Create katana cursor sprite
+                this.katanaCursor = this.add.sprite(0, 0, 'katana');
+                this.katanaCursor.setScale(0.15);
+                this.katanaCursor.setRotation(Phaser.Math.DegToRad(45)); // Angled down-right
+                this.katanaCursor.setDepth(1000); // Always on top
+                this.katanaCursor.setOrigin(0.2, 0.2); // Rotate from handle
+
+                // Click/tap handler
+                this.input.on('pointerdown', this.handleSlice, this);
+
+                // Track last second for flash effect
+                this.lastSecond = 10;
+            }
+
+            handleSlice(pointer) {
+                if (this.gameOver) return;
+
+                if (!this.gameStarted) {
+                    this.gameStarted = true;
+                    this.startText.destroy();
+                    return;
+                }
+
+                // Check if click is on the pizza
+                const distance = Phaser.Math.Distance.Between(
+                    pointer.x,
+                    pointer.y,
+                    this.pizza.x,
+                    this.pizza.y
+                );
+
+                if (distance <= 160) {
+                    this.score++;
+                    this.scoreText.setText(`Slices: ${this.score}`);
+
+                    // Create slice mark
+                    this.addSliceMark(pointer.x, pointer.y);
+
+                    // Create slash animation
+                    this.createSlashAnimation(pointer.x, pointer.y);
+
+                    // Play slice sound effect (visual feedback)
+                    this.cameras.main.shake(30, 0.002);
+                }
+            }
+
+            createSlashAnimation(x, y) {
+                // Randomly choose one of 5 different slash motions
+                const slashType = Phaser.Math.Between(1, 5);
+
+                let startX, startY, endX, endY, startRotation, endRotation;
+
+                switch(slashType) {
+                    case 1: // Right to left horizontal
+                        startX = x + 200;
+                        startY = y;
+                        endX = x - 200;
+                        endY = y;
+                        startRotation = 0;
+                        endRotation = 0;
+                        break;
+                    case 2: // Top-right to bottom-left diagonal
+                        startX = x + 150;
+                        startY = y - 150;
+                        endX = x - 150;
+                        endY = y + 150;
+                        startRotation = -45;
+                        endRotation = -45;
+                        break;
+                    case 3: // Top to bottom vertical
+                        startX = x;
+                        startY = y - 200;
+                        endX = x;
+                        endY = y + 200;
+                        startRotation = 90;
+                        endRotation = 90;
+                        break;
+                    case 4: // Bottom-right to top-left diagonal
+                        startX = x + 150;
+                        startY = y + 150;
+                        endX = x - 150;
+                        endY = y - 150;
+                        startRotation = -135;
+                        endRotation = -135;
+                        break;
+                    case 5: // Left to right horizontal
+                        startX = x - 200;
+                        startY = y;
+                        endX = x + 200;
+                        endY = y;
+                        startRotation = 180;
+                        endRotation = 180;
+                        break;
+                }
+
+                // Create katana sprite for slash animation
+                const slashKatana = this.add.sprite(startX, startY, 'katana');
+                slashKatana.setScale(0.8);
+                slashKatana.setRotation(Phaser.Math.DegToRad(startRotation));
+                slashKatana.setAlpha(0.9);
+                slashKatana.setDepth(500);
+
+                // Animate the slash motion (no rotation, just movement)
+                this.tweens.add({
+                    targets: slashKatana,
+                    x: endX,
+                    y: endY,
+                    rotation: Phaser.Math.DegToRad(endRotation),
+                    scale: 1.0,
+                    duration: 120,
+                    ease: 'Power2'
+                });
+
+                // Fade out and destroy
+                this.tweens.add({
+                    targets: slashKatana,
+                    alpha: 0,
+                    duration: 120,
+                    delay: 30,
+                    onComplete: () => {
+                        slashKatana.destroy();
+                    }
+                });
+            }
+
+            addSliceMark(x, y) {
+                // Random angle for slice mark
+                const angle = Phaser.Math.Between(0, 360);
+                const length = 320; // Width of pizza (diameter)
+
+                const centerX = this.pizza.x;
+                const centerY = this.pizza.y;
+
+                // Calculate line endpoints - extend across entire pizza
+                const radians = Phaser.Math.DegToRad(angle);
+                const x1 = centerX - Math.cos(radians) * length / 2;
+                const y1 = centerY - Math.sin(radians) * length / 2;
+                const x2 = centerX + Math.cos(radians) * length / 2;
+                const y2 = centerY + Math.sin(radians) * length / 2;
+
+                // Draw slice mark - thicker and darker
+                this.sliceGraphics.lineStyle(4, 0x000000, 0.8);
+                this.sliceGraphics.lineBetween(x1, y1, x2, y2);
+
+                // Store slice mark
+                this.sliceMarks.push({ x1, y1, x2, y2 });
+            }
+
+            update(time, delta) {
+                // Update katana cursor position to follow mouse
+                const pointer = this.input.activePointer;
+                this.katanaCursor.x = pointer.x;
+                this.katanaCursor.y = pointer.y;
+
+                if (!this.gameStarted || this.gameOver) return;
+
+                // Update timer
+                this.timeRemaining -= delta;
+
+                if (this.timeRemaining <= 0) {
+                    this.timeRemaining = 0;
+                    this.endGame();
+                }
+
+                // Update timer display (2 decimal places)
+                const seconds = (this.timeRemaining / 1000).toFixed(2);
+                this.timerText.setText(`${seconds}s`);
+
+                // Flash timer when second changes
+                if (seconds < this.lastSecond) {
+                    this.lastSecond = seconds;
+                    this.flashTimer();
+                }
+            }
+
+            flashTimer() {
+                // Flash effect
+                this.tweens.add({
+                    targets: this.timerText,
+                    scaleX: 1.3,
+                    scaleY: 1.3,
+                    duration: 100,
+                    yoyo: true,
+                    ease: 'Power2'
+                });
+
+                this.tweens.add({
+                    targets: this.timerText,
+                    alpha: 0.3,
+                    duration: 100,
+                    yoyo: true,
+                    ease: 'Power2'
+                });
+            }
+
+            endGame() {
+                this.gameOver = true;
+                this.canRestart = false; // Prevent immediate restart
+
+                const { width, height } = this.cameras.main;
+
+                // Keep score visible in top left (bring to front)
+                this.scoreText.setDepth(1001);
+
+                // Game over background
+                const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7);
+                overlay.setDepth(999);
+
+                // Game over text
+                const gameOverText = this.add.text(width / 2, height / 2 - 50, 'TIME\'S UP!', {
+                    fontSize: '64px',
+                    fontFamily: 'Irish Grover',
+                    color: '#ff0000',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 6
+                });
+                gameOverText.setOrigin(0.5);
+                gameOverText.setDepth(1000);
+
+                // Final score
+                const finalScoreText = this.add.text(width / 2, height / 2 + 30, `Final Slices: ${this.score}`, {
+                    fontSize: '48px',
+                    fontFamily: 'Irish Grover',
+                    color: '#ffff00',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 5
+                });
+                finalScoreText.setOrigin(0.5);
+                finalScoreText.setDepth(1000);
+
+                // Restart instruction (initially hidden)
+                const restartText = this.add.text(width / 2, height / 2 + 100, 'Click to Restart', {
+                    fontSize: '32px',
+                    fontFamily: 'Irish Grover',
+                    color: '#ffffff',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 4
+                });
+                restartText.setOrigin(0.5);
+                restartText.setDepth(1000);
+                restartText.setAlpha(0);
+
+                // Back button (initially hidden)
+                const backButton = this.add.text(width / 2, height / 2 + 160, 'Back to Menu', {
+                    fontSize: '28px',
+                    fontFamily: 'Irish Grover',
+                    color: '#00ff00',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 4
+                });
+                backButton.setOrigin(0.5);
+                backButton.setDepth(1000);
+                backButton.setAlpha(0);
+                backButton.setInteractive({ useHandCursor: true });
+                backButton.on('pointerdown', () => {
+                    if (this.canRestart) {
+                        window.location.href = 'index.html';
+                    }
+                });
+                backButton.on('pointerover', () => {
+                    if (this.canRestart) {
+                        backButton.setScale(1.1);
+                    }
+                });
+                backButton.on('pointerout', () => {
+                    backButton.setScale(1.0);
+                });
+
+                // Fade in restart text and back button after delay
+                this.time.delayedCall(1000, () => {
+                    this.canRestart = true;
+                    this.tweens.add({
+                        targets: [restartText, backButton],
+                        alpha: 1,
+                        duration: 300,
+                        ease: 'Power2'
+                    });
+                });
+
+                // Restart on click (but not on back button)
+                const restartHandler = (pointer) => {
+                    if (!this.canRestart) return; // Ignore clicks during delay
+
+                    // Check if click was on back button area
+                    const backBounds = backButton.getBounds();
+                    if (Phaser.Geom.Rectangle.Contains(backBounds, pointer.x, pointer.y)) {
+                        return; // Let the back button handle it
+                    }
+
+                    // Refresh the page to restart
+                    window.location.reload();
+                };
+
+                this.input.on('pointerdown', restartHandler, this);
+            }
+        }
+
+        // Phaser game configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#34495e',
+            scene: PizzaSlicerGame,
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 800,
+                height: 600
+            }
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>

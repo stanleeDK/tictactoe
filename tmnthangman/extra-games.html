@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMNT Extra Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Irish Grover', cursive;
+            background-image: url('tmnt_background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo {
+            position: absolute;
+            top: clamp(20px, 4vh, 50px);
+            width: 90%;
+            max-width: 400px;
+            height: auto;
+        }
+
+        .title {
+            font-size: clamp(36px, 6vw, 72px);
+            color: #00ff00;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                         -2px -2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: clamp(30px, 6vh, 60px);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .games-container {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(20px, 3vh, 30px);
+            align-items: center;
+            margin-bottom: clamp(20px, 4vh, 40px);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .game-button {
+            padding: clamp(15px, 2vh, 20px) clamp(30px, 4vw, 50px);
+            font-size: clamp(24px, 3vw, 32px);
+            font-weight: bold;
+            font-family: 'Irish Grover', cursive;
+            background-color: #ff9800;
+            color: #000;
+            border: 4px solid #000;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-button:hover {
+            background-color: #ffb74d;
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        .game-button:active {
+            transform: scale(0.98) translateY(0);
+        }
+
+        .game-button.stanlee {
+            background-color: #2196F3;
+        }
+
+        .game-button.stanlee:hover {
+            background-color: #42A5F5;
+        }
+
+        .game-button.pizza {
+            background-color: #4CAF50;
+        }
+
+        .game-button.pizza:hover {
+            background-color: #66BB6A;
+        }
+
+        .back-button {
+            padding: clamp(10px, 1.5vh, 12px) clamp(20px, 3vw, 30px);
+            font-size: clamp(18px, 2vw, 24px);
+            font-weight: bold;
+            font-family: 'Irish Grover', cursive;
+            background-color: #9E9E9E;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .back-button:hover {
+            background-color: #BDBDBD;
+            transform: scale(1.05);
+        }
+
+        .subtitle {
+            font-size: clamp(18px, 2.5vw, 24px);
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: clamp(20px, 3vh, 30px);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* Responsive Media Queries */
+        @media (max-width: 480px) {
+            .logo {
+                top: 10px;
+                width: 70%;
+            }
+
+            .title {
+                margin-top: 80px;
+            }
+
+            .games-container {
+                width: 95%;
+            }
+
+            .game-button {
+                min-width: unset;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .title {
+                margin-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="tmntlogo.png" alt="TMNT Logo" class="logo">
+
+    <div class="title">EXTRA GAMES</div>
+    <div class="subtitle">Choose Your Adventure!</div>
+
+    <div class="games-container">
+        <a href="http://stanlee.info" class="game-button stanlee" target="_blank">Tic Tac Toe</a>
+        <a href="./pizza-slicer.html" class="game-button pizza">Pizza Slicer Game</a>
+    </div>
+
+    <a href="./index.html" class="back-button">Back to Main Menu</a>
+</body>
+</html>

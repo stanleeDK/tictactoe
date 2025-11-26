@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 	// "time"
+	"strconv"
 )
 
 // this struct enables this controller to be instantiated in main.go; 
@@ -215,9 +216,14 @@ func (gp *gamePlayFacilitation)showGameTree(writer http.ResponseWriter, request 
 	// take the built prediction tree + minimax scores on the nodes, and change into a format the treant libary can render in browser
 	treantTree := currentGameSession.PredictionTree.CreateTreantJSONTree()
 
+	jsonTree, _ := json.Marshal(treantTree)
+
+
 	// send the tree, now in treant format for rendering, back to the browser 
 	writer.Header().Set("Content-Type","application/json")
-	json.NewEncoder(writer).Encode(treantTree)
+	writer.Header().Set("Content-Length",strconv.Itoa(len(jsonTree)))
+	// json.NewEncoder(writer).Encode(treantTree)
+	writer.Write(jsonTree)
 
 }
 

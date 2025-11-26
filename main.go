@@ -64,7 +64,8 @@ func main() {
 	http.HandleFunc("/showgametree/", gamePlayFacilitator.showGameTree)
 	http.HandleFunc("/getprogress/", gamePlayFacilitator.getMoveTreeBuildingProgress)
 	http.Handle("/staticfiles/", http.StripPrefix("/staticfiles/", http.FileServer(http.Dir("staticfiles"))))
-	
+	http.Handle("/tmnt/", http.StripPrefix("/tmnt/", http.FileServer(http.Dir("tmnthangman"))))
+
 
 
 	environment := os.Getenv("GO_ENV")	
@@ -78,7 +79,7 @@ func main() {
 		    Addr:              "0.0.0.0:80",
 		    Handler:           nil,  // nil = use http.DefaultServeMux (your existing handlers)
 		    // ReadTimeout:       5 * time.Minute,  // For large uploads
-		    WriteTimeout:      30 * time.Second,
+		    WriteTimeout:      60 * time.Second,
 		    // ReadHeaderTimeout: 10 * time.Second,
 		    IdleTimeout:       120 * time.Second,
 		}
