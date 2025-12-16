@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMNT Hangman - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap');
+
+        body {
+            font-family: 'Irish Grover', cursive;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: clamp(20px, 4vw, 40px);
+            border-radius: 20px;
+            border: 3px solid #000;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            max-width: 300px;
+            width: 80%;
+            height: auto;
+        }
+
+        .title {
+            text-align: center;
+            font-size: clamp(28px, 5vw, 40px);
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: clamp(18px, 2.5vw, 22px);
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: clamp(16px, 2vw, 18px);
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #00ff00;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            font-size: clamp(20px, 3vw, 24px);
+            font-weight: bold;
+            background-color: #00ff00;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Irish Grover', cursive;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .button:hover {
+            background-color: #00cc00;
+            transform: scale(1.02);
+        }
+
+        .button.secondary {
+            background-color: #ff9800;
+        }
+
+        .button.secondary:hover {
+            background-color: #ff7700;
+        }
+
+        .toggle-text {
+            text-align: center;
+            font-size: clamp(14px, 2vw, 16px);
+            margin-top: 15px;
+            color: #666;
+        }
+
+        .toggle-link {
+            color: #0066cc;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .toggle-link:hover {
+            color: #0044aa;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #c62828;
+            margin-bottom: 15px;
+            font-size: clamp(14px, 2vw, 16px);
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #2e7d32;
+            margin-bottom: 15px;
+            font-size: clamp(14px, 2vw, 16px);
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Media Queries */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .logo img {
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="tmnt_background.png" alt="Background" class="background">
+
+    <div class="container">
+        <div class="logo">
+            <img src="tmntlogo.png" alt="TMNT Hangman Logo">
+        </div>
+
+        <div class="title" id="formTitle">Login</div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="form-container">
+            <div class="form-group">
+                <label for="loginEmail">Email Address</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            </div>
+            <button class="button" onclick="handleLogin()">Login</button>
+            <div class="toggle-text">
+                Don't have an account? <span class="toggle-link" onclick="toggleForms()">Sign up</span>
+            </div>
+            <div class="toggle-text">
+                <span class="toggle-link" onclick="continueAsGuest()">Continue as guest</span>
+            </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="form-container hidden">
+            <div class="form-group">
+                <label for="signupEmail">Email Address</label>
+                <input type="email" id="signupEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" placeholder="Create a password" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPasswordConfirm">Confirm Password</label>
+                <input type="password" id="signupPasswordConfirm" placeholder="Confirm your password" required>
+            </div>
+            <button class="button secondary" onclick="handleSignup()">Sign Up</button>
+            <div class="toggle-text">
+                Already have an account? <span class="toggle-link" onclick="toggleForms()">Login</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is already logged in
+        if (localStorage.getItem('tmnt_logged_in') === 'true') {
+            window.location.href = './index.html';
+        }
+
+        function continueAsGuest() {
+            localStorage.setItem('tmnt_logged_in', 'true');
+            localStorage.setItem('tmnt_current_user', 'guest');
+            window.location.href = './index.html';
+        }
+
+        function toggleForms() {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const formTitle = document.getElementById('formTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Clear messages
+            errorMessage.classList.remove('show');
+            successMessage.classList.remove('show');
+
+            if (loginForm.classList.contains('hidden')) {
+                // Show login form
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                formTitle.textContent = 'Login';
+            } else {
+                // Show signup form
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                formTitle.textContent = 'Sign Up';
+            }
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.remove('show');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        function showSuccess(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            errorMessage.classList.remove('show');
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+        }
+
+        function handleSignup() {
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+            // Validation
+            if (!email || !password || !passwordConfirm) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            // Check if user already exists
+            const existingUser = localStorage.getItem(`tmnt_user_${email}`);
+            if (existingUser) {
+                showError('An account with this email already exists');
+                return;
+            }
+
+            // Save user credentials
+            localStorage.setItem(`tmnt_user_${email}`, JSON.stringify({
+                email: email,
+                password: password
+            }));
+
+            showSuccess('Account created successfully! Redirecting...');
+
+            // Log user in and redirect
+            setTimeout(() => {
+                localStorage.setItem('tmnt_logged_in', 'true');
+                localStorage.setItem('tmnt_current_user', email);
+                window.location.href = './index.html';
+            }, 1500);
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // Validation
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            // Check if user exists
+            const userDataString = localStorage.getItem(`tmnt_user_${email}`);
+            if (!userDataString) {
+                showError('No account found with this email');
+                return;
+            }
+
+            const userData = JSON.parse(userDataString);
+
+            // Check password
+            if (userData.password !== password) {
+                showError('Incorrect password');
+                return;
+            }
+
+            showSuccess('Login successful! Redirecting...');
+
+            // Log user in and redirect
+            setTimeout(() => {
+                localStorage.setItem('tmnt_logged_in', 'true');
+                localStorage.setItem('tmnt_current_user', email);
+                window.location.href = './index.html';
+            }, 1000);
+        }
+
+        // Add enter key support
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const loginForm = document.getElementById('loginForm');
+                if (!loginForm.classList.contains('hidden')) {
+                    handleLogin();
+                } else {
+                    handleSignup();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

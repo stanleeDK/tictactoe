@@ -1,5 +1,11 @@
 <html>
 <head>
+<script>
+  // Check if user is logged in, redirect to login page if not
+  if (localStorage.getItem('tmnt_logged_in') !== 'true') {
+    window.location.href = './login.html';
+  }
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMNT Hangman</title>
@@ -100,12 +106,63 @@ body {
   transform: scale(1.05);
 }
 
+.logout-button {
+  position: absolute;
+  bottom: 30px;
+  left: 150px;
+  padding: 8px 20px;
+  font-size: clamp(14px, 1.8vw, 18px);
+  font-weight: bold;
+  background-color: #2196F3;
+  color: #fff;
+  border: 2px solid #000;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  font-family: 'Irish Grover', cursive;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #1976D2;
+  transform: scale(1.05);
+}
+
 .extra-game-button:hover {
   background-color: #ff7700;
   transform: scale(1.05);
 }
 
 .extra-game-button.flash {
+  animation: flashGlow 1.5s ease-in-out infinite;
+}
+
+.badges-button {
+  position: absolute;
+  bottom: 90px;
+  right: 30px;
+  padding: 12px 30px;
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: bold;
+  background-color: #00ff00;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  display: none;
+  font-family: 'Irish Grover', cursive;
+  white-space: nowrap;
+}
+
+.badges-button:hover {
+  background-color: #00cc00;
+  transform: scale(1.05);
+}
+
+.badges-button.flash {
   animation: flashGlow 1.5s ease-in-out infinite;
 }
 
@@ -157,6 +214,21 @@ body {
   max-width: 600px;
   min-height: 200px;
   cursor: pointer;
+  position: relative;
+}
+
+.level-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #000;
+  color: #00ff00;
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-size: clamp(14px, 1.5vw, 18px);
+  font-weight: bold;
+  font-family: 'Irish Grover', cursive;
+  z-index: 10;
 }
 
 .card-image {
@@ -190,6 +262,12 @@ body {
     padding: 12px 30px;
   }
 
+  .badges-button {
+    bottom: 60px;
+    right: 10px;
+    padding: 8px 16px;
+  }
+
   .extra-game-button {
     bottom: 10px;
     right: 10px;
@@ -199,6 +277,13 @@ body {
   .reset-button {
     bottom: 10px;
     left: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .logout-button {
+    bottom: 10px;
+    left: 90px;
     padding: 6px 12px;
     font-size: 12px;
   }
@@ -225,6 +310,12 @@ body {
     padding: 12px 40px;
   }
 
+  .badges-button {
+    bottom: 70px;
+    right: 15px;
+    padding: 10px 20px;
+  }
+
   .extra-game-button {
     bottom: 15px;
     right: 15px;
@@ -234,6 +325,12 @@ body {
   .reset-button {
     bottom: 15px;
     left: 15px;
+    padding: 6px 15px;
+  }
+
+  .logout-button {
+    bottom: 15px;
+    left: 110px;
     padding: 6px 15px;
   }
 }
@@ -252,24 +349,60 @@ body {
 	<div class="hangman-text">HANGMAN</div>
 
 	<button class="start-button">START</button>
+	<a href="./badges.html" class="badges-button">Badges</a>
 	<a href="./extra-games.html" class="extra-game-button">Play Extra Games</a>
 	<a href="./reset-game.html" class="reset-button">Reset Progress</a>
+	<button class="logout-button" onclick="handleLogout()">Logout</button>
 <div class="card-container">
   <div class="card" id="level1">
+    <div class="level-label">Level 1</div>
     <img src="level1.png" alt="Character 1" class="card-image">
     <div class="card-text" id="turtletracks">Turtle Tracks</div>
   </div>
   <div class="card" id="level2">
+    <div class="level-label">Level 2</div>
     <img src="level2image.jpeg" alt="Character 2" class="card-image">
     <div class="card-text" id="metalhead">Case of the killer pizzas</div>
   </div>
   <div class="card" id="level3">
+    <div class="level-label">Level 3</div>
     <img src="level3.png" alt="Character 3" class="card-image">
     <div class="card-text" id="nightmarelair">Nightmare in the Lair</div>
   </div>
   <div class="card" id="level4">
+    <div class="level-label">Level 4</div>
     <img src="level4.png" alt="Character 4" class="card-image">
     <div class="card-text" id="getshredder">Get Shredder</div>
+  </div>
+  <div class="card" id="level5">
+    <div class="level-label">Level 5</div>
+    <img src="level5.png" alt="Character 5" class="card-image">
+    <div class="card-text" id="ninjasword">Ninja Sword of Nowhere</div>
+  </div>
+  <div class="card" id="level6">
+    <div class="level-label">Level 6</div>
+    <img src="entertheshredder.png" alt="Character 6" class="card-image">
+    <div class="card-text" id="entershredder">Enter the Shredder</div>
+  </div>
+  <div class="card" id="level7">
+    <div class="level-label">Level 7</div>
+    <img src="level7.png" alt="Character 7" class="card-image">
+    <div class="card-text" id="energyprojector">Planet of the Turtles</div>
+  </div>
+  <div class="card" id="level8">
+    <div class="level-label">Level 8</div>
+    <img src="level8kimiono.png" alt="Character 8" class="card-image">
+    <div class="card-text" id="kimono">Case of the Hot Kimono</div>
+  </div>
+  <div class="card" id="level9">
+    <div class="level-label">Level 9</div>
+    <img src="level9.png" alt="Character 9" class="card-image">
+    <div class="card-text" id="ratking">Enter the Rat King</div>
+  </div>
+  <div class="card" id="level10">
+    <div class="level-label">Level 10</div>
+    <img src="level10tempestra.png" alt="Character 10" class="card-image">
+    <div class="card-text" id="tempestra">Leonardo vs Tempestra</div>
   </div>
 </div>
 <script>
@@ -279,9 +412,14 @@ body {
     1: { elementId: 'turtletracks', originalText: 'Turtle Tracks' },
     2: { elementId: 'metalhead', originalText: 'Case of the killer pizzas' },
     3: { elementId: 'nightmarelair', originalText: 'Nightmare in the Lair' },
-    4: { elementId: 'getshredder', originalText: 'Get Shredder' }
+    4: { elementId: 'getshredder', originalText: 'Get Shredder' },
+    5: { elementId: 'ninjasword', originalText: 'Ninja Sword of Nowhere' },
+    6: { elementId: 'entershredder', originalText: 'Enter the Shredder' },
+    7: { elementId: 'energyprojector', originalText: 'Planet of the Turtles' },
+    8: { elementId: 'kimono', originalText: 'Case of the Hot Kimono' },
+    9: { elementId: 'ratking', originalText: 'Enter the Rat King' },
+    10: { elementId: 'tempestra', originalText: 'Leonardo vs Tempestra' }
     // Future levels can be added here up to level 50
-    // 5: { elementId: 'level5id', originalText: 'Level 5 Name' },
     // etc...
   };
 
@@ -336,6 +474,24 @@ body {
     }
   }
 
+  // Check if level 5 has been completed (persistent flag) and show badges button with flash
+  if (localStorage.getItem('tmnt_level5_persistent') === 'true') {
+    const badgesButton = document.querySelector('.badges-button');
+    if (badgesButton) {
+      badgesButton.style.display = 'inline-block';
+      badgesButton.classList.add('flash');
+    }
+  }
+
+  // Check if level 9 has been completed (persistent flag) and show badges button with flash
+  if (localStorage.getItem('tmnt_level9_persistent') === 'true') {
+    const badgesButton = document.querySelector('.badges-button');
+    if (badgesButton) {
+      badgesButton.style.display = 'inline-block';
+      badgesButton.classList.add('flash');
+    }
+  }
+
 	document.querySelector('.start-button').addEventListener('click', function() {
     showlevels();
   });
@@ -355,6 +511,38 @@ body {
   document.querySelector('#level4').addEventListener('click', function() {
     window.location.href = "./level4.html"
   })
+
+  document.querySelector('#level5').addEventListener('click', function() {
+    window.location.href = "./level5.html"
+  })
+
+  document.querySelector('#level6').addEventListener('click', function() {
+    window.location.href = "./level6.html"
+  })
+
+  document.querySelector('#level7').addEventListener('click', function() {
+    window.location.href = "./level7.html"
+  })
+
+  document.querySelector('#level8').addEventListener('click', function() {
+    window.location.href = "./level8.html"
+  })
+
+  document.querySelector('#level9').addEventListener('click', function() {
+    window.location.href = "./level9.html"
+  })
+
+  document.querySelector('#level10').addEventListener('click', function() {
+    window.location.href = "./level10.html"
+  })
+
+  function handleLogout() {
+    // Clear login state
+    localStorage.removeItem('tmnt_logged_in');
+    localStorage.removeItem('tmnt_current_user');
+    // Redirect to login page
+    window.location.href = './login.html';
+  }
 
 function showlevels(){
         // Hide elements
