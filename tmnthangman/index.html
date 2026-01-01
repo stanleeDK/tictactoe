@@ -404,6 +404,11 @@ body {
     <img src="level10tempestra.png" alt="Character 10" class="card-image">
     <div class="card-text" id="tempestra">Leonardo vs Tempestra</div>
   </div>
+  <div class="card" id="level11">
+    <div class="level-label">Level 11</div>
+    <img src="tecnhodrome.png" alt="Character 11" class="card-image">
+    <div class="card-text" id="technodrome">Return of the Technodrome</div>
+  </div>
 </div>
 <script>
 
@@ -418,7 +423,8 @@ body {
     7: { elementId: 'energyprojector', originalText: 'Planet of the Turtles' },
     8: { elementId: 'kimono', originalText: 'Case of the Hot Kimono' },
     9: { elementId: 'ratking', originalText: 'Enter the Rat King' },
-    10: { elementId: 'tempestra', originalText: 'Leonardo vs Tempestra' }
+    10: { elementId: 'tempestra', originalText: 'Leonardo vs Tempestra' },
+    11: { elementId: 'technodrome', originalText: 'Return of the Technodrome' }
     // Future levels can be added here up to level 50
     // etc...
   };
@@ -534,6 +540,10 @@ body {
 
   document.querySelector('#level10').addEventListener('click', function() {
     window.location.href = "./level10.html"
+  })
+
+  document.querySelector('#level11').addEventListener('click', function() {
+    window.location.href = "./level11.html"
   })
 
   function handleLogout() {
