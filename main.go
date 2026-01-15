@@ -64,7 +64,7 @@ func main() {
 	http.HandleFunc("/showgametree/", gamePlayFacilitator.showGameTree)
 	http.HandleFunc("/getprogress/", gamePlayFacilitator.getMoveTreeBuildingProgress)
 	http.Handle("/staticfiles/", http.StripPrefix("/staticfiles/", http.FileServer(http.Dir("staticfiles"))))
-	http.Handle("/tmnt/", http.StripPrefix("/tmnt/", http.FileServer(http.Dir("tmnthangman"))))
+	
 
 
 
