@@ -32,8 +32,13 @@ func NewGamePlayFacilitation() *gamePlayFacilitation {
 // to the browser reprsenting a move. the html is appended to a hidden div, which the javascript retrieves 
 func (gp *gamePlayFacilitation) getCurrentBoardState (writer http.ResponseWriter, request *http.Request) {
 	params := request.URL.Query()
+	currentGameSession, exists := gp.primaryGameSessions.GetSession(params.Get("sessionid"))
+	if !exists {//session not found, quit and return message
+		http.Error(writer,"session not found",http.StatusNotFound)
+		return
+	}
 	writer.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(writer, gp.primaryGameSessions.GameSessionsRunning[params.Get("sessionid")].GameBoard.Html)
+	fmt.Fprint(writer, currentGameSession.GameBoard.Html)
 }
 
 // handler for creating game session and returning sessionid to the client 
@@ -155,7 +160,11 @@ func (gp *gamePlayFacilitation)getMoveTreeBuildingProgress(writer http.ResponseW
     writer.Header().Set("Cache-Control", "no-cache")
     writer.Header().Set("Connection", "keep-alive")
     writer.Header().Set("Access-Control-Allow-Origin", "*")
-    flusher, _ 		:= writer.(http.Flusher)
+    flusher, canFlush 	:= writer.(http.Flusher)
+    if !canFlush {// without flushing there is no way to stream progress to the client
+        http.Error(writer,"streaming unsupported",http.StatusInternalServerError)
+        return
+    }
     
 
 	// GET parameters 
@@ -170,13 +179,22 @@ func (gp *gamePlayFacilitation)getMoveTreeBuildingProgress(writer http.ResponseW
 
 
 	currentGameSession, exists  := gp.primaryGameSessions.GetSession(seshID)
-	if !exists {
+	if !exists {//session not found, report it on the stream and stop; there is no channel to read from
 		progressInfo["data"] = "session not found"
 		data, _ := json.Marshal(progressInfo)
 		fmt.Fprintf(writer,"data: %s\n\n",data)
+		flusher.Flush()
+		return
 	}
 
 	// get the channel of the current session 
+	if currentGameSession.PredictionTree == nil {//no tree is being built, so there is no progress to report
+		progressInfo["data"] = "no move tree is being built"
+		data, _ := json.Marshal(progressInfo)
+		fmt.Fprintf(writer,"data: %s\n\n",data)
+		flusher.Flush()
+		return
+	}
 	progressChannel := currentGameSession.PredictionTree.ProgressChannelForMoveTreeBuilding
 	
 	for {
@@ -204,14 +222,29 @@ func (gp *gamePlayFacilitation)getMoveTreeBuildingProgress(writer http.ResponseW
 
 func (gp *gamePlayFacilitation)restartGame(writer http.ResponseWriter, request *http.Request){
 	params := request.URL.Query()
-	gp.primaryGameSessions.GameSessionsRunning[params.Get("sessionid")].GameBoard = NewBoardInstance()
-	gp.primaryGameSessions.GameSessionsRunning[params.Get("sessionid")].PredictionTree = nil
+	currentGameSession, exists := gp.primaryGameSessions.GetSession(params.Get("sessionid"))
+	if !exists {//session not found, quit and return message
+		http.Error(writer,"session not found",http.StatusNotFound)
+		return
+	}
+	currentGameSession.GameBoard = NewBoardInstance()
+	// a fresh tree rather than nil, so the board matches what a brand new session looks like
+	// and the progress/tree endpoints have something valid to read
+	currentGameSession.PredictionTree = NewTree(*currentGameSession.GameBoard)
 	fmt.Println("helloggghgpoop[y] butt [line from henrik nov 2024...]")
 }
 
 func (gp *gamePlayFacilitation)showGameTree(writer http.ResponseWriter, request *http.Request){
-	params 								:= request.URL.Query()
-	var currentGameSession *GameSession = gp.primaryGameSessions.GameSessionsRunning[params.Get("sessionid")]
+	params 								  := request.URL.Query()
+	currentGameSession, exists 			  := gp.primaryGameSessions.GetSession(params.Get("sessionid"))
+	if !exists {//session not found, quit and return message
+		http.Error(writer,"session not found",http.StatusNotFound)
+		return
+	}
+	if currentGameSession.PredictionTree == nil {//nothing has been built yet, so there is no tree to render
+		http.Error(writer,"no move tree has been built for this session yet",http.StatusNotFound)
+		return
+	}
 
 	// take the built prediction tree + minimax scores on the nodes, and change into a format the treant libary can render in browser
 	treantTree := currentGameSession.PredictionTree.CreateTreantJSONTree()

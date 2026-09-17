@@ -187,6 +187,14 @@ and relies on `http.ServeMux`'s redirect.
 
 `cellIndex` is a two-character row/column string: `"00"` through `"22"`.
 
+Every `sessionid`-bearing endpoint looks the session up under the sessions mutex and
+returns `404 Not Found` for an unknown id. `/getprogress/` reports the same condition on
+the stream instead, since the client is an `EventSource`:
+
+```
+data: {"PayLoadType":"thisisprogressdata","data":"session not found"}
+```
+
 Progress events look like this, terminating when the channel closes:
 
 ```
@@ -229,12 +237,6 @@ Honest notes on the current state of the code:
   one. It is also the point: the tree exists so it can be looked at.
 - **Sessions are never reaped.** `GameSessionsRunning` grows for the lifetime of the
   process; abandoned games are kept in memory along with their trees.
-- **Unguarded session lookups.** `getCurrentBoardState`, `restartGame`, and
-  `showGameTree` index the sessions map directly, bypassing both the mutex and the
-  existence check that `processHumanMove` performs. An unknown `sessionid` panics that
-  request's goroutine, and concurrent access races.
-- **`getMoveTreeBuildingProgress` doesn't return on a missing session.** It writes
-  "session not found" and then falls through to dereference the nil session.
 - **Fixed roles.** The human is always `x` and moves first; the computer is always `o`.
   The plumbing for choosing a side is still visible in the code but unused.
 - **All state is in memory.** Restarting the server drops every game in progress.
