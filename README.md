@@ -1,5 +1,7 @@
 # Triple T Tantilizer
 
+**▶ Play it live: [tictactoe.stanlee.info](https://tictactoe.stanlee.info)**
+
 An unbeatable tic-tac-toe opponent, written in Go with no external dependencies.
 
 Every time you move, the server enumerates **the entire remaining game** into an
@@ -47,7 +49,9 @@ whole tree in your browser and see exactly why the computer chose what it chose.
 
 ## Quick start
 
-Requires Go 1.18 or newer.
+The game is deployed at **<https://tictactoe.stanlee.info>** — no setup required.
+
+To run it yourself you need Go 1.18 or newer.
 
 ```bash
 git clone https://github.com/stanleeDK/tictactoe.git
